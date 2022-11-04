@@ -1,0 +1,8 @@
+originX	996
+originY	516
+csize	0.05
+_minX	-49.8237
+_minY	-57.1733
+_maxX	111.427
+_maxY	25.853
+margin	50
