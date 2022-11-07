@@ -19,6 +19,7 @@ int main(int argc, char *argv[])
 	cv::Mat imgMap = cv::imread("../Map/Origin_Map/EE1F/occMap.png", cv::IMREAD_COLOR);
 	*/
 
+	/*
 	//RWRC2021
 	std::string filename = "RWRC2021_sta_data";
 	int IMG_ORIGIN_X = 1046;
@@ -26,16 +27,16 @@ int main(int argc, char *argv[])
 	int lim = 3000;
 	int count = 10;
 	cv::Mat imgMap = cv::imread("../Map/Origin_Map/RWRC2021/occMap.png", cv::IMREAD_COLOR);
-	
-
-	/*//RWRC2022
-	std::string filename = "RWRC2021_sta_data";
-	int IMG_ORIGIN_X = 1395;
-	int IMG_ORIGIN_Y = 325;
-	int lim = 3000;
-	int count = 10
-	cv::Mat imgMap = cv::imread("../Map/Origin_Map/RWRC2022/occMap.png", cv::IMREAD_COLOR);
 	*/
+
+	//RWRC2022
+	std::string filename = "RWRC2022_sta_data";
+	int IMG_ORIGIN_X = 1305;
+	int IMG_ORIGIN_Y = 385;
+	int lim = 3000;
+	int count = 10;
+	cv::Mat imgMap = cv::imread("../Map/Origin_Map/RWRC2022/occMap.png", cv::IMREAD_COLOR);
+	
 
 	/*===========================================================================*/
 
@@ -45,22 +46,21 @@ int main(int argc, char *argv[])
 	std::cin >> ans;
 	int dis_ans = ans.compare(str);
 
-	int base = 984;
+	int base = 1000;
 	int hight = 500;
-	int width = 1600;
+	int width = 2200;
 	int center_h = hight / 2;
 	int center_w = width / 2;
 	
 	//mapを開く
 	cv::Mat img_cnv;
 	cv::cvtColor(imgMap, img_cnv, cv::COLOR_BGR2BGRA);		//BGRからBGRAに変換
-	
+
 	cv::Mat imgAcc = cv::Mat(cv::Size(width, hight), CV_8UC3, cv::Scalar(182, 182, 182));
 	cv::line(imgAcc, cv::Point(100,50),cv::Point(100,hight-50), cv::Scalar(255,255,255),2,cv::LINE_8);
-	cv::line(imgAcc, cv::Point(50,center_h),cv::Point(1550,center_h), cv::Scalar(255,255,255),2,cv::LINE_8);
+	cv::line(imgAcc, cv::Point(50,center_h),cv::Point(width-50,center_h), cv::Scalar(255,255,255),2,cv::LINE_8);
 
 	//判別結果のファイルを開く
-	std::cout << "date file name:";
 	std::string path = "../data/Sta_data/";
 	std::ifstream file(path + filename);
 	//ファイルが開けなかった場合
@@ -69,10 +69,11 @@ int main(int argc, char *argv[])
 		std::exit(1);
 	}
 
-
 	float TS, lab, F, z;
-	double x, y, deg, qx, qy;
+	double x, y, deg, qx, qy, v;
 	int i, lab2;
+	int N = 0;
+	int I = 0;
 	int n = 0;
 	int k = 0;
 	int f = 0;
@@ -90,7 +91,7 @@ int main(int argc, char *argv[])
 
 	//データの読み込み
 	while(!file.eof()) {
-		file >> TS >> F >> lab >> lab2 >> z >> x >> y >> deg;
+		file >> TS >> F >> lab >> lab2 >> z >> x >> y >> deg >> v;
 		map_lab.emplace_back(lab);		//分散値
 		map_z.emplace_back(z);			//Z軸の加速度
 		map_x.emplace_back(x);			//自己位置(x)
@@ -99,24 +100,24 @@ int main(int argc, char *argv[])
 	}
 
 	//データの総数
-	i = map_x.size() - 1;
+	I = map_x.size() - 1;
 	
 	double csize = 0.05;  // 1pixelは0.05m に相当（これも聞く）
 
 	std::cerr << "Map Showing..." << std::endl;
 
 	//指定座標にプロット
-	while (n < i){
+	while (N < I){
 		//mapでの座標値
-		qx = map_x[n] / csize + IMG_ORIGIN_X;
-		qy =-map_y[n] / csize + IMG_ORIGIN_Y;
+		qx = (map_x[N] + 8) / csize + IMG_ORIGIN_X;
+		qy =-map_y[N] / csize + IMG_ORIGIN_Y;
 
 		//地図へRGBの色付けとA値を付与
 		//上限設定
-		if (map_lab[n] > lim){
-			map_lab[n] = lim;
+		if (map_lab[N] > lim){
+			map_lab[N] = lim;
 		}
-		color_num = (map_lab[n] / lim) * 255;	//分散値を0~255の値に変換
+		color_num = (map_lab[N] / lim) * 255;	//分散値を0~255の値に変換
 		
 		//分散値（小）ならばBlueで表示をしA値を付与
 		if (color_num < 64){
@@ -125,11 +126,11 @@ int main(int argc, char *argv[])
 					img_cnv.at<cv::Vec4b>(qy + n, qx + i)[0] = 255;
 					img_cnv.at<cv::Vec4b>(qy + n, qx + i)[1] = 0;
 					img_cnv.at<cv::Vec4b>(qy + n, qx + i)[2] = 0;
-					img_cnv.at<cv::Vec4b>(qy + n, qx + i)[3] = color_num;	//A値を付与
+					img_cnv.at<cv::Vec4b>(qy + n, qx + i)[3] = color_num;	//A値を付与 
 				}
 			}
-			cv::circle(imgAcc, cv::Point(c + 101, center_h + map_z[n] - base), 1, cv::Scalar(255,0,0), -1);
-			cv::line(imgAcc, cv::Point(c + 100, center_h + map_z[n-10] - base),cv::Point(c + 101,center_h + map_z[n] - base), cv::Scalar(255,0,0),2,cv::LINE_8);
+			cv::circle(imgAcc, cv::Point(c + 101, center_h + map_z[N] - base), 1, cv::Scalar(255,0,0), -1);
+			cv::line(imgAcc, cv::Point(c + 100, center_h + map_z[N] - base),cv::Point(c + 101,center_h + map_z[N+10] - base), cv::Scalar(255,0,0),2,cv::LINE_8);
 		}
 
 		//分散値（中）ならばGreenで表示をしA値を付与
@@ -142,8 +143,8 @@ int main(int argc, char *argv[])
 					img_cnv.at<cv::Vec4b>(qy + n, qx + i)[3] = color_num;	//A値を付与
 				}
 			}
-			cv::circle(imgAcc, cv::Point(c + 101, center_h + map_z[n] - base), 1, cv::Scalar(0,255,0), -1);
-			cv::line(imgAcc, cv::Point(c + 100, center_h + map_z[n-10] - base),cv::Point(c + 101,center_h + map_z[n] - base), cv::Scalar(0,255,0),2,cv::LINE_8);
+			cv::circle(imgAcc, cv::Point(c + 101, center_h + map_z[N] - base), 1, cv::Scalar(0,255,0), -1);
+			cv::line(imgAcc, cv::Point(c + 100, center_h + map_z[N] - base),cv::Point(c + 101,center_h + map_z[N+10] - base), cv::Scalar(0,255,0),2,cv::LINE_8);
 		}
 
 		//分散値（大）ならばRedで表示をしA値を付与
@@ -156,25 +157,36 @@ int main(int argc, char *argv[])
 					img_cnv.at<cv::Vec4b>(qy + n, qx + i)[3] = color_num;	//A値を付与
 				}
 			}
-			cv::circle(imgAcc, cv::Point(c + 101, center_h + map_z[n] - base), 1, cv::Scalar(0,0,255), -1);
-			cv::line(imgAcc, cv::Point(c + 100, center_h + map_z[n-10] - base),cv::Point(c + 101,center_h + map_z[n] - base), cv::Scalar(0,0,255),2,cv::LINE_8);
+			cv::circle(imgAcc, cv::Point(c + 101, center_h + map_z[N] - base), 1, cv::Scalar(0,0,255), -1);
+			cv::line(imgAcc, cv::Point(c + 100, center_h + map_z[N] - base),cv::Point(c + 101,center_h + map_z[N+10] - base), cv::Scalar(0,0,255),2,cv::LINE_8);
 		}
 
-		n = n + count;
+		N = N + count;
 		c = c + 1;
-	
+
+		//std::cerr << n << std::endl; 
+
 		//mapを逐次表示
 		if (dis_ans == 0){
-			cv::imshow("Map", img_cnv);
-			cv::imshow("Acc", imgAcc);
+			cv::Mat display_img;
+			cv::resize(img_cnv, display_img, cv::Size(), 0.4, 0.4);
+			cv::Mat display_Acc;
+			cv::resize(imgAcc, display_Acc, cv::Size(), 0.8, 0.8);
+			cv::imshow("Map", display_img);
+			//cv::imshow("Map", img_cnv);
+			cv::imshow("Acc", display_Acc);
 			//key = cv::waitKey(42);
 			cv::waitKey(1);
 		}
 	}
 
 	//完成mapを表示＆保存
-	cv::imshow("Map", img_cnv);
-	cv::imshow("Acc", imgAcc);
+	cv::Mat display_img;
+	cv::resize(img_cnv, display_img, cv::Size(), 0.4, 0.4);
+	cv::Mat display_Acc;
+	cv::resize(imgAcc, display_Acc, cv::Size(), 0.8, 0.8);
+	cv::imshow("Map", display_img);
+	cv::imshow("Acc", display_Acc);
 	std::cerr << " " << std::endl;
 	std::cerr << "Done." << std::endl;
 	cv::imwrite("../Map/Acc_Map/map_RGBA.png", img_cnv);

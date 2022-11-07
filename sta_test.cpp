@@ -18,9 +18,9 @@ int main(int argc, char *argv[])
 {
 	std::string filename = "EE1_flat_sub";		//マスターデータファイル
 	
-	std::string filename2 = "2cb_EE1log.log";	//計測結果ファイル(EE1F)
+	//std::string filename2 = "2cb_EE1log.log";	//計測結果ファイル(EE1F)
 	//std::string filename2 = "RWRC2021.log";	//計測結果ファイル(RWRC2021)
-	//std::string filename2 = "RWRC2022.log";	//計測結果ファイル(RWRC2022)
+	std::string filename2 = "RWRC2022.log";	//計測結果ファイル(RWRC2022)
 
 	
 	//マスターデータファイルを開く
@@ -84,18 +84,18 @@ int main(int argc, char *argv[])
 	}
 
 	//計測データの読み込み
-	//file2 >> TS >> x >> y >> deg >> ax >> ay >> az >> wx >> wy >> wz >> mx >> my >> mz >> v >> w;
-	file2 >> TS >> ts >> az >> x >> y >> deg;
+	file2 >> TS >> x >> y >> deg >> ax >> ay >> az >> wx >> wy >> wz >> mx >> my >> mz >> v >> w;
+	//file2 >> TS >> ts >> az >> x >> y >> deg;
 	while(!file2.eof()){
-		az = az * 1000;
+		//az = az * 1000;
 		acc_mes_z.emplace_back(az);
 		mes_x.emplace_back(x);
 		mes_y.emplace_back(y);
 		mes_deg.emplace_back(deg);
 		mes_ts.emplace_back(TS);
-		//mes_v.emplace_back(v);
-		//file2 >> TS >> x >> y >> deg >> ax >> ay >> az >> wx >> wy >> wz >> mx >> my >> mz >> v >> w;
-		file2 >> TS >> ts >> az >> x >> y >> deg;
+		mes_v.emplace_back(v);
+		file2 >> TS >> x >> y >> deg >> ax >> ay >> az >> wx >> wy >> wz >> mx >> my >> mz >> v >> w;
+		//file2 >> TS >> ts >> az >> x >> y >> deg;
 	}
 	
 	//データ数
@@ -159,7 +159,7 @@ int main(int argc, char *argv[])
 				<< mes_x[c_out + i] << " "	//自己位置x
 				<< mes_y[c_out + i] << " "	//自己位置y
 				<< mes_deg[c_out + i] << " " 	//自己位置deg
-			//	<< mes_v[c_out + i] << " "	//速度v
+				<< mes_v[c_out + i] << " "	//速度v
 				<< std::endl;
 			i = i + 1;
 		}
