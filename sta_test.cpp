@@ -16,15 +16,52 @@ int F_test(float, float, float, float, float);
 
 int main(int argc, char *argv[]) 
 {
-	std::string filename = "EE1_flat_sub";		//マスターデータファイル
+
+	std::string str_1 = "1";
+	std::string str_2 = "2";
+	std::string str_3 = "3";
+	std::string str_4 = "4";
+	std::string ans_loc;
+	std::cerr	<< "1: EE1F\n" 
+			<< "2: RWRC2021\n"
+			<< "3: RWRC2022\n"
+			<< "4: ONCT"
+			<< std::endl;
+	std::cout << "==================================================" << std::endl;
+	std::cerr << "choose the location:";
+	std::cin >> ans_loc;
+	int dis_ans_1, dis_ans_2, dis_ans_3 ,dis_ans_4 = 1;
+	dis_ans_1 = ans_loc.compare(str_1);
+	dis_ans_2 = ans_loc.compare(str_2);
+	dis_ans_3 = ans_loc.compare(str_3);
+	dis_ans_4 = ans_loc.compare(str_4);
+
+	std::string filename;
+	std::string filename2;
+
+	if (dis_ans_1 == 0){
+		filename = "EE1_flat_sub";
+		filename2 = "2cb_EE1log.log";
+	}
+
+	if (dis_ans_2 == 0){
+		filename = "RWRC2021.log";
+		filename2 = "RWRC2021.log";
+	}
 	
-	//std::string filename2 = "2cb_EE1log.log";	//計測結果ファイル(EE1F)
-	//std::string filename2 = "RWRC2021.log";	//計測結果ファイル(RWRC2021)
-	std::string filename2 = "RWRC2022.log";	//計測結果ファイル(RWRC2022)
+	if (dis_ans_3 == 0){
+		filename = "RWRC2022.log";
+		filename2 = "RWRC2022.log";
+	}
+
+	if (dis_ans_4 == 0){
+		filename = "ONCT.log";
+		filename2 = "ONCT.log";
+	}
 
 	
 	//マスターデータファイルを開く
-	std::cout << "open the Master data file: " << filename << std::endl;
+	std::cout << "→→→ open the Master data file: \t\t" << filename << std::endl;
 	std::string path = "../data/Master_data/";
 	std::ifstream file(path + filename);
 	if (!file){
@@ -33,7 +70,7 @@ int main(int argc, char *argv[])
 	}
 
 	//計測結果のファイル
-	std::cout << "open the Measured data file: " << filename2 << std::endl;
+	std::cout << "→→→ open the Measured data file: \t" << filename2 << std::endl;
 	std::string path2 = "../data/Origin_data/";
 	std::ifstream file2(path2 + filename2);
 	if (!file2){
@@ -43,7 +80,7 @@ int main(int argc, char *argv[])
 
 	//出力ファイルの設定
 	std::string outfile = "result_sta_data";
-	std::cout << "make the Output file: " << outfile <<std::endl;
+	std::cout << "==================================================" << std::endl;
 	std::string outpath = "../data/";
 	std::ofstream ofs(outpath + outfile);
 	if (!ofs){
@@ -76,11 +113,13 @@ int main(int argc, char *argv[])
 	std::vector<double> mes_v;
 
 	//教師データの読み込み
-	file >> TS >> ts >> az >> x >> y >> deg;
+	//file >> TS >> ts >> az >> x >> y >> deg;
+	file >> TS >> x >> y >> deg >> ax >> ay >> az >> wx >> wy >> wz >> mx >> my >> mz >> v >> w;
 	while(!file.eof()){
-		az = az * 1000;
+		//az = az * 1000;
 		acc_z.emplace_back(az);
-		file >> TS >> ts >> az >> x >> y >> deg;
+		//file >> TS >> ts >> az >> x >> y >> deg;
+		file >> TS >> x >> y >> deg >> ax >> ay >> az >> wx >> wy >> wz >> mx >> my >> mz >> v >> w;
 	}
 
 	//計測データの読み込み
@@ -103,11 +142,11 @@ int main(int argc, char *argv[])
 	size_mes = acc_mes_z.size();
 
 	//データ数からの棄却領域設定
-	std::cout << "母データ数" << "\n" << size << std::endl;
-	std::cout << "標本データ数" << "\n" << N << std::endl;
-	std::cout << "上側限界値:";
+	std::cout << "母データ数:\t" << size << std::endl;
+	std::cout << "標本データ数:\t" << N << std::endl;
+	std::cout << "上側限界値:\t";
 	std::cin >> F_u;
-	std::cout << "下側限界値:";
+	std::cout << "下側限界値:\t";
 	std::cin >> F_l;
 
 	//教師データの平均
@@ -159,7 +198,7 @@ int main(int argc, char *argv[])
 				<< mes_x[c_out + i] << " "	//自己位置x
 				<< mes_y[c_out + i] << " "	//自己位置y
 				<< mes_deg[c_out + i] << " " 	//自己位置deg
-				<< mes_v[c_out + i] << " "	//速度v
+				//<< mes_v[c_out + i] << " "	//速度v
 				<< std::endl;
 			i = i + 1;
 		}
